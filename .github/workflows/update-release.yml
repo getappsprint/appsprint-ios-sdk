@@ -1,0 +1,77 @@
+name: Update Release
+
+# Triggered by the private iOS repo's release workflow via repository_dispatch,
+# or manually with a version input.
+on:
+  repository_dispatch:
+    types: [ios-release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 0.2.0)'
+        required: true
+      xcframework_url:
+        description: 'URL to XCFramework zip'
+        required: true
+
+jobs:
+  update:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version from dispatch
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "version=${{ github.event.client_payload.version }}" >> "$GITHUB_OUTPUT"
+            echo "url=${{ github.event.client_payload.xcframework_url }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+            echo "url=${{ github.event.inputs.xcframework_url }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download XCFramework and compute checksum
+        id: checksum
+        run: |
+          curl -L -o AppSprintSDK.xcframework.zip "${{ steps.version.outputs.url }}"
+          CHECKSUM=$(swift package compute-checksum AppSprintSDK.xcframework.zip)
+          echo "checksum=$CHECKSUM" >> "$GITHUB_OUTPUT"
+          rm AppSprintSDK.xcframework.zip
+
+      - name: Update Package.swift
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          CHECKSUM="${{ steps.checksum.outputs.checksum }}"
+          sed -i '' "s|url: \".*\"|url: \"https://github.com/app-sprint/appsprint-ios-sdk/releases/download/${VERSION}/AppSprintSDK.xcframework.zip\"|" Package.swift
+          sed -i '' "s|checksum: \".*\"|checksum: \"${CHECKSUM}\"|" Package.swift
+
+      - name: Update podspec version
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          sed -i '' "s/s.version          = '.*'/s.version          = '${VERSION}'/" AppSprintSDK.podspec
+
+      - name: Commit and tag
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Package.swift AppSprintSDK.podspec
+          git commit -m "Release ${VERSION}"
+          git tag "${VERSION}"
+          git push origin main --tags
+
+      - name: Re-upload XCFramework to this repo's release
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          curl -L -o AppSprintSDK.xcframework.zip "${{ steps.version.outputs.url }}"
+          gh release create "${VERSION}" \
+            AppSprintSDK.xcframework.zip \
+            --title "AppSprintSDK ${VERSION}" \
+            --notes "Binary XCFramework for AppSprintSDK ${VERSION}"
+          rm AppSprintSDK.xcframework.zip
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
