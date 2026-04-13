@@ -75,3 +75,8 @@ jobs:
           rm AppSprintSDK.xcframework.zip
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to CocoaPods
+        run: pod trunk push AppSprintSDK.podspec --allow-warnings
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
