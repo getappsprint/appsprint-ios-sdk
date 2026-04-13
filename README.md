@@ -9,14 +9,14 @@ Lightweight mobile attribution SDK for iOS. Tracks installs, events, and campaig
 Add this package in Xcode:
 
 1. File > Add Package Dependencies
-2. Enter: `https://github.com/app-sprint/appsprint-ios-sdk`
+2. Enter: `https://github.com/getappsprint/appsprint-ios-sdk`
 3. Select version rule: "Up to Next Major" from `0.2.0`
 
 Or add to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/app-sprint/appsprint-ios-sdk", from: "0.2.0")
+    .package(url: "https://github.com/getappsprint/appsprint-ios-sdk", from: "0.2.0")
 ]
 ```
 

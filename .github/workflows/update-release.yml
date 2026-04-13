@@ -46,7 +46,7 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           CHECKSUM="${{ steps.checksum.outputs.checksum }}"
-          sed -i '' "s|url: \".*\"|url: \"https://github.com/app-sprint/appsprint-ios-sdk/releases/download/${VERSION}/AppSprintSDK.xcframework.zip\"|" Package.swift
+          sed -i '' "s|url: \".*\"|url: \"https://github.com/getappsprint/appsprint-ios-sdk/releases/download/${VERSION}/AppSprintSDK.xcframework.zip\"|" Package.swift
           sed -i '' "s|checksum: \".*\"|checksum: \"${CHECKSUM}\"|" Package.swift
 
       - name: Update podspec version
