@@ -10,20 +10,20 @@ Add this package in Xcode:
 
 1. File > Add Package Dependencies
 2. Enter: `https://github.com/getappsprint/appsprint-ios-sdk`
-3. Select version rule: "Up to Next Major" from `0.2.0`
+3. Select version rule: "Up to Next Major" from `0.3.0`
 
 Or add to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/getappsprint/appsprint-ios-sdk", from: "0.2.0")
+    .package(url: "https://github.com/getappsprint/appsprint-ios-sdk", from: "0.3.0")
 ]
 ```
 
 ### CocoaPods
 
 ```ruby
-pod 'AppSprintSDK', '~> 0.2.0'
+pod 'AppSprintSDK', '~> 0.3.0'
 ```
 
 ## Quick Start
@@ -53,7 +53,12 @@ let config = AppSprintConfig(
     enableAppleAdsAttribution: true,          // Default: true
     isDebug: false,                           // Default: false
     logLevel: .warn,                          // Default: .warn
-    customerUserId: nil                       // Optional
+    customerUserId: nil,                      // Optional
+    autoTrackSessions: true,                  // Default: true. Auto-fires .sessionStart on
+                                              // configure() and foreground, debounced 30 min.
+    autoRefreshAttribution: true              // Default: true. Refetches /v1/sdk/attribution
+                                              // on configure() / foreground / late AdServices
+                                              // PATCH so server-side late resolution propagates.
 )
 ```
 
@@ -72,8 +77,10 @@ AppSprint.shared.flush() async
 
 // Attribution
 AppSprint.shared.getAttribution() -> AttributionResult?
+AppSprint.shared.getAttributionParams() -> [String: String]
 AppSprint.shared.getAppSprintId() -> String?
-AppSprint.shared.enableAppleAdsAttribution()
+AppSprint.shared.refreshAttribution() async -> AttributionResult?
+AppSprint.shared.enableAppleAdsAttribution() -> Bool
 
 // User
 AppSprint.shared.setCustomerUserId(_ userId: String) async
@@ -85,7 +92,7 @@ AppSprint.shared.clearData()
 
 ### Event Types
 
-`login`, `signUp`, `register`, `purchase`, `subscribe`, `startTrial`, `addToCart`, `addToWishlist`, `initiateCheckout`, `viewContent`, `viewItem`, `search`, `share`, `tutorialComplete`, `levelStart`, `levelComplete`, `custom`
+`sessionStart`, `login`, `signUp`, `register`, `purchase`, `subscribe`, `startTrial`, `addPaymentInfo`, `addToCart`, `addToWishlist`, `initiateCheckout`, `viewContent`, `viewItem`, `search`, `share`, `tutorialComplete`, `achieveLevel`, `levelStart`, `levelComplete`, `custom`
 
 ## Requirements
 
