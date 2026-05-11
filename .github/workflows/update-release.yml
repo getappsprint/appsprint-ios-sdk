@@ -40,7 +40,8 @@ jobs:
       - name: Download XCFramework and compute checksum
         id: checksum
         run: |
-          curl -L -o AppSprintSDK.xcframework.zip "${{ steps.version.outputs.url }}"
+          curl -fL --retry 3 --retry-delay 5 -o AppSprintSDK.xcframework.zip "${{ steps.version.outputs.url }}"
+          unzip -t AppSprintSDK.xcframework.zip >/dev/null
           CHECKSUM=$(swift package compute-checksum AppSprintSDK.xcframework.zip)
           echo "checksum=$CHECKSUM" >> "$GITHUB_OUTPUT"
           rm AppSprintSDK.xcframework.zip
@@ -86,7 +87,8 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           RELEASE_TAG="${{ steps.version.outputs.release_tag }}"
-          curl -L -o AppSprintSDK.xcframework.zip "${{ steps.version.outputs.url }}"
+          curl -fL --retry 3 --retry-delay 5 -o AppSprintSDK.xcframework.zip "${{ steps.version.outputs.url }}"
+          unzip -t AppSprintSDK.xcframework.zip >/dev/null
           if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
             gh release upload "${RELEASE_TAG}" AppSprintSDK.xcframework.zip --clobber
           else
