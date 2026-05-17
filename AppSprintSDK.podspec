@@ -39,6 +39,6 @@ SOFTWARE.
   s.vendored_frameworks = 'AppSprintSDK.xcframework'
   s.swift_version = '5.9'
 
-  s.frameworks = 'Foundation', 'UIKit'
+  s.frameworks = 'Foundation', 'UIKit', 'CoreTelephony', 'Metal', 'CoreGraphics', 'CryptoKit'
   s.weak_frameworks = 'AdServices', 'AppTrackingTransparency', 'AdSupport'
 end
